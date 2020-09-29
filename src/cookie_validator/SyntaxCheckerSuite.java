@@ -15,13 +15,19 @@ interface DateAndTime {
     String rfc1123_date = wkday + ", " + date1 + " " + time + " " + "GMT";
 }
 
-interface AcceptedValues extends DateAndTime {
+interface Domains {
+    String subdomain = ;
+    String domain_value = "((" + subdomain + ")" + "|" + "(\\." + subdomain + "|" + "=$" + ")";
+}
+
+interface AcceptedValues extends DateAndTime, Domains {
     String expires_av = "Expires=" + rfc1123_date;
     String max_age_av = "(Max-Age=[1-9][0-9]*)";
-    String domain_av = "";
-    String path_av = "";
-    String secure_av = "";
-    String httponly_av = "";
+    String domain_av = "Domain="+ domain_value;
+    String path_value = "[^\\;, \n]";
+    String path_av = "Path=" + path_value;
+    String secure_av = "Secure";
+    String httponly_av = "HttpOnly";
 }
 
 /**
@@ -30,8 +36,8 @@ interface AcceptedValues extends DateAndTime {
 public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
     protected static ArrayList<String> internal_cache = new ArrayList<>();
 
-    protected static String cookie_av = expires_av + "|" + max_age_av  + "|" + domain_av + "|" +
-                                        path_av  + "|" + secure_av + "|" + httponly_av;
+    protected static String cookie_av = "(" + expires_av + "|" + max_age_av  + "|" + domain_av + "|" +
+                                        path_av  + "|" + secure_av + "|" + httponly_av + ")";
 
 
     protected static String cookie_value = "((\"" + cookie_illegal + "\")|" + cookie_illegal +")"; // Split into 2 cases: covered with quotes or not
@@ -39,7 +45,7 @@ public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
 
     protected static String cookie_pair = token + "=" + cookie_value;
 
-    protected static String set_cookie_string = cookie_pair + "*(\\; "+ cookie_av +")";
+    protected static String set_cookie_string = cookie_pair + "(\\; "+ cookie_av +")*";
     protected static String main_pattern = "^(Set-Cookie: )" + set_cookie_string;
 
     protected static boolean beginAndEnd(String s) {
@@ -53,13 +59,13 @@ public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
             internal_cache.add(s.substring(m.start(), m.end()));
         }
 
+        for (String x: internal_cache) {
+            System.out.println(x);
+        }
+
         // If it does not start with "Set-Cookie", return false
         if (internal_cache.size() == 0) {
             return false;
-        }
-
-        for (String x: internal_cache) {
-            System.out.println(x);
         }
 
         if (internal_cache.get(0).equals(s)) {
@@ -73,5 +79,6 @@ public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
     public static void main(String[] args) {
         System.out.println(beginAndEnd("Set-Cookie: ns1=\"alss/0.foobar^\""));
         System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT"));
+        System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT; Path=/"));
     }
 }
