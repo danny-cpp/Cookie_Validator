@@ -1,6 +1,7 @@
 package cookie_validator;
 import java.util.ArrayList;
 import java.util.regex.*;
+import static cookie_validator.RecursiveRegex.*;
 
 interface IllegalCharacters {
     String separators = "(,),<,>,@,\\,,;,:,\\\\,\",\\/,\\[,\\],\\{,\\},\\?,=,\\s,\\t";
@@ -15,15 +16,24 @@ interface DateAndTime {
     String rfc1123_date = wkday + ", " + date1 + " " + time + " " + "GMT";
 }
 
-interface Domains {
-    String subdomain = ;
-    String domain_value = "((" + subdomain + ")" + "|" + "(\\." + subdomain + "|" + "=$" + ")";
+interface Domains  {
+    String letter = "[a-zA-Z]";
+    String digits = "[0 - 9]";
+    String let_dig = "(" + letter + "|" + digits + ")";
+    String let_dig_hyp = "(" + let_dig + "|-" + ")";
+    String ldh_str = "(" + let_dig_hyp + "+" + ")";
+    String label = "(" + letter +   "("+ ldh_str + "?" + let_dig +")" + "?"   + ")";
+    String subdomain = "(" +  "(" + label + ")"   + "|" +
+                              "("  +  "(" + label + ")"   + "(\\." + label + ")+"    +
+                              ")" +
+                        ")";
+    String domain_value = "((" + subdomain + ")" + "|" + "(\\." + subdomain + ")" + "|" + "=$" + ")";
 }
 
 interface AcceptedValues extends DateAndTime, Domains {
     String expires_av = "Expires=" + rfc1123_date;
     String max_age_av = "(Max-Age=[1-9][0-9]*)";
-    String domain_av = "Domain="+ domain_value;
+    String domain_av = "Domain=" + domain_value;
     String path_value = "[^\\;, \n]";
     String path_av = "Path=" + path_value;
     String secure_av = "Secure";
@@ -80,5 +90,7 @@ public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
         System.out.println(beginAndEnd("Set-Cookie: ns1=\"alss/0.foobar^\""));
         System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT"));
         System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT; Path=/"));
+        System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT; Path=/; Domain=.example.com; HttpOnly"));
+        System.out.println(subdomain);
     }
 }
