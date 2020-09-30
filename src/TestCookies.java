@@ -1,11 +1,11 @@
-import static cookie_validator.SyntaxCheckerSuite.beginAndEnd;
+import static cookie_validator.SyntaxCheckerSuite.cookieChecker;
 
 /**
  * ECE 325 - Fall 2020 <br/>
  * Assignment 2: Java regular expressions <br/>
  * Test cookies using regular expressions
  * <p>
- * @author <replace with your name>
+ * @author Danh Nguyen, ID: 1592873
  */
 public class TestCookies {
 
@@ -17,9 +17,7 @@ public class TestCookies {
     public static boolean verifyCookie(String cookie) {
         boolean legal = false;
 
-        // TODO: Assignment 2 -- compose your regular expression, and use it to verify the cookie
-
-        return beginAndEnd(cookie);
+        return cookieChecker(cookie);
     }
 
     /**
