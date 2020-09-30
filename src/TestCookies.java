@@ -1,3 +1,5 @@
+import static cookie_validator.SyntaxCheckerSuite.beginAndEnd;
+
 /**
  * ECE 325 - Fall 2020 <br/>
  * Assignment 2: Java regular expressions <br/>
@@ -17,7 +19,7 @@ public class TestCookies {
 
         // TODO: Assignment 2 -- compose your regular expression, and use it to verify the cookie
 
-        return legal;
+        return beginAndEnd(cookie);
     }
 
     /**

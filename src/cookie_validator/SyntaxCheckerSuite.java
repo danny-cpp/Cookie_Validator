@@ -23,11 +23,8 @@ interface Domains  {
     String let_dig_hyp = "(" + let_dig + "|-" + ")";
     String ldh_str = "(" + let_dig_hyp + "+" + ")";
     String label = "(" + letter +   "("+ ldh_str + "?" + let_dig +")" + "?"   + ")";
-    String subdomain = "(" +  "(" + label + ")"   + "|" +
-                              "("  +  "(" + label + ")"   + "(\\." + label + ")+"    +
-                              ")" +
-                        ")";
-    String domain_value = "((" + subdomain + ")" + "|" + "(\\." + subdomain + ")" + "|" + "=$" + ")";
+    String subdomain = "(" + label + "|" + "(\\." +  label + ")+" + ")";;
+    String domain_value = "(" + subdomain  + "|" + "(\\." + subdomain + ")"  + ")" + "?";
 }
 
 interface AcceptedValues extends DateAndTime, Domains {
@@ -51,14 +48,14 @@ public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
 
 
     protected static String cookie_value = "((\"" + cookie_illegal + "\")|" + cookie_illegal +")"; // Split into 2 cases: covered with quotes or not
-    protected static String token = "([^" + separators + "]*)"; // Everything except separators
+    protected static String token = "([^" + separators + "]+)"; // Everything except separators
 
     protected static String cookie_pair = token + "=" + cookie_value;
 
     protected static String set_cookie_string = cookie_pair + "(\\; "+ cookie_av +")*";
     protected static String main_pattern = "^(Set-Cookie: )" + set_cookie_string;
 
-    protected static boolean beginAndEnd(String s) {
+    public static boolean beginAndEnd(String s) {
         internal_cache.clear();
 
         String pattern = "^(Set-Cookie: )([^(,),<,>,@,\\,,;,:,\\\\,\",\\/,\\[,\\],\\{,\\},\\?,=,\\s,\\t]*)";
@@ -69,9 +66,9 @@ public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
             internal_cache.add(s.substring(m.start(), m.end()));
         }
 
-        for (String x: internal_cache) {
-            System.out.println(x);
-        }
+        // for (String x: internal_cache) {
+        //     System.out.println(x);
+        // }
 
         // If it does not start with "Set-Cookie", return false
         if (internal_cache.size() == 0) {
@@ -86,11 +83,12 @@ public class SyntaxCheckerSuite implements IllegalCharacters, AcceptedValues {
         }
     }
 
+    static String dummy = "(" + label + "|" + "(\\." +  label + ")+" + ")";
     public static void main(String[] args) {
-        System.out.println(beginAndEnd("Set-Cookie: ns1=\"alss/0.foobar^\""));
+        // System.out.println(beginAndEnd("Set-Cookie: ns1=\"alss/0.foobar^\""));
         System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT"));
         System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT; Path=/"));
-        System.out.println(beginAndEnd("Set-Cookie: lu=Rg3v; Expires=Wed, 19 Nov 2008 16:35:39 GMT; Path=/; Domain=.example.com; HttpOnly"));
-        System.out.println(subdomain);
+        System.out.println(beginAndEnd("Set-Cookie: ns1=alss/0.foobar^; httponly"));
+
     }
 }
